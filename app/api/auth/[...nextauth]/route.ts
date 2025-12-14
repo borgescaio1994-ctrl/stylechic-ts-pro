@@ -1,6 +1,5 @@
 // 📁 app/api/auth/[...nextauth]/route.ts
 
-// Este arquivo funciona como o endpoint da API para todas as requisições de autenticação.
-// Ele apenas re-exporta os handlers GET e POST configurados em '@/lib/auth'.
+import { handlers } from "@/auth"; // Certifique-se de que este caminho está correto
 
-export { GET, POST } from "@/lib/auth";
+export const { GET, POST } = handlers;
