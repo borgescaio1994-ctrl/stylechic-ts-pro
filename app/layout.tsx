@@ -1,17 +1,14 @@
 // 📁 app/layout.tsx
-
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; 
+import { Inter } from "next/font/google"; // Importe a fonte (Server Side)
+import Providers from "@/components/providers/Providers"; // Importa o componente cliente
 import "./globals.css";
-
-// Importação do AuthProvider (que deve estar em components/providers/auth-provider.tsx)
-import { AuthProvider } from "@/components/providers/auth-provider"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Style Chic - Agendamentos",
-  description: "Sistema de agendamento online para salão de beleza.",
+  title: "Style Chic Pro",
+  description: "Agendamentos de beleza",
 };
 
 export default function RootLayout({
@@ -22,10 +19,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        {/* Envolvendo a aplicação no AuthProvider */}
-        <AuthProvider>
+        <Providers> {/* Aqui usamos o provedor cliente */}
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
