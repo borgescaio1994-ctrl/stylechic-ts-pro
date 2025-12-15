@@ -28,7 +28,7 @@ export default function CustomLoginForm() {
     setMessage('');
 
     if (isRegistering) {
-      // 1. CHAMA O ENDPOINT DE CADASTRO MANUAL (Próxima etapa)
+      // TENTA CADASTRO MANUAL
       try {
         const response = await fetch('/api/auth/register', {
           method: 'POST',
@@ -41,7 +41,7 @@ export default function CustomLoginForm() {
         if (response.ok) {
           setMessage('✅ Cadastro realizado com sucesso! Tentando Login...');
           
-          // 2. TENTA FAZER LOGIN MANUALMENTE APÓS O CADASTRO
+          // TENTA FAZER LOGIN MANUALMENTE APÓS O CADASTRO
           const result = await signIn('credentials', {
             redirect: false,
             email: formData.email,
@@ -49,9 +49,8 @@ export default function CustomLoginForm() {
           });
 
           if (result?.error) {
-            setMessage('Erro no login automático. Tente entrar manualmente.');
+            setMessage('Erro no login automático. Por favor, entre manualmente.');
           } else {
-            // Redireciona para a Home Page
             window.location.href = '/'; 
           }
 
@@ -59,10 +58,10 @@ export default function CustomLoginForm() {
           setMessage(`Erro no Cadastro: ${data.message || 'Dados inválidos.'}`);
         }
       } catch (error) {
-        setMessage('Erro de conexão ou servidor.');
+        setMessage('Erro de conexão ou servidor ao registrar.');
       }
     } else {
-        // 3. TENTA FAZER LOGIN MANUAL
+        // TENTA FAZER LOGIN MANUAL (VIA Credentials Provider)
         const result = await signIn('credentials', {
             redirect: false,
             email: formData.email,
@@ -87,7 +86,7 @@ export default function CustomLoginForm() {
                 onClick={() => setIsRegistering(!isRegistering)}
                 className="text-sm text-indigo-600 hover:text-indigo-800 transition duration-150"
             >
-                {isRegistering ? 'Já tenho conta, quero Entrar' : 'Não tenho conta, quero me Cadastrar'}
+                {isRegistering ? 'Já tenho conta? Entrar' : 'Novo por aqui? Cadastrar-se'}
             </button>
         </div>
 
@@ -108,13 +107,14 @@ export default function CustomLoginForm() {
                     <input 
                         type="text" 
                         name="username" 
-                        placeholder="Nome de Usuário"
+                        placeholder="Nome de Usuário (único)"
                         required 
                         onChange={handleChange} 
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                 </div>
                 <div>
+                    <label className="text-xs text-gray-500">Data de Nascimento:</label>
                     <input 
                         type="date" 
                         name="birthdate" 
@@ -151,7 +151,7 @@ export default function CustomLoginForm() {
             <input 
                 type="password" 
                 name="password" 
-                placeholder="Senha (mínimo 6 caracteres)"
+                placeholder="Senha"
                 required 
                 onChange={handleChange} 
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"

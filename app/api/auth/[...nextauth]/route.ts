@@ -1,24 +1,24 @@
-// 📁 app/api/auth/[...nextauth]/route.ts (Completo e Final)
+// 📁 app/api/auth/[...nextauth]/route.ts
 
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-// 🛑 NOVO: Importe o CredentialsProvider
 import CredentialsProvider from "next-auth/providers/credentials"; 
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma"; 
 import { Role } from "@prisma/client"; 
-import bcrypt from 'bcryptjs'; // Importe o bcrypt
+import bcrypt from 'bcryptjs'; 
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
 
   providers: [
+    // 1. Provedor Google (para Login Social)
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     
-    // 🛑 NOVO: Adicione o CredentialsProvider para login manual
+    // 2. Provedor Credentials (para Login Manual após Cadastro)
     CredentialsProvider({
         name: "E-mail e Senha",
         credentials: {
@@ -44,7 +44,7 @@ export const authOptions: AuthOptions = {
             return null;
           }
 
-          // Se for válido, retorna o usuário (o NextAuth usará este objeto)
+          // Retorna o objeto user, que será usado para criar a sessão
           return user; 
         }
     }),
@@ -54,15 +54,13 @@ export const authOptions: AuthOptions = {
     strategy: "jwt", 
   },
   
-  pages: { // Redireciona para nossa página customizada
-    signIn: '/login', 
+  pages: { 
+    signIn: '/login', // Redireciona a chamada do NextAuth para nossa página customizada
   },
 
   callbacks: {
-    // ... (Mantenha os callbacks jwt e session intactos)
     async jwt({ token, user }) {
       if (user) {
-        // ... (Mantém o token.role)
         token.role = (user as { role: Role }).role; 
       }
       return token;
@@ -70,7 +68,6 @@ export const authOptions: AuthOptions = {
     
     async session({ session, token }) {
       if (token) {
-        // ... (Mantém o session.user.role)
         (session.user as { role: Role }).role = token.role as Role;
       }
       return session;

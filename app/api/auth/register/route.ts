@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, email, password, username, birthdate, phone } = body;
 
-    // 1. Validação básica
+    // 1. Validação
     if (!email || !password || !name || !username || !phone || !birthdate) {
       return NextResponse.json({ message: "Preencha todos os campos obrigatórios." }, { status: 400 });
     }
@@ -26,21 +26,21 @@ export async function POST(request: Request) {
     // 3. Criptografar a senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Criar o novo usuário (Role CLIENTE como padrão)
+    // 4. Criar o novo usuário
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
         username,
         phone,
-        birthdate: new Date(birthdate), // Converte string para Data
-        password: hashedPassword,
-        // Role padrão para novos cadastros manuais
+        // Atenção: O campo role agora é String, o valor deve ser string.
         role: "CLIENT", 
+        birthdate: new Date(birthdate), 
+        password: hashedPassword,
       },
     });
 
-    // Remover a senha antes de retornar a resposta
+    // Remove a senha antes de retornar
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: userPassword, ...userWithoutPass } = newUser;
 
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Erro no cadastro:', error);
+    // Retorna a mensagem genérica de erro interno se houver falha
     return NextResponse.json({ message: "Ocorreu um erro interno no servidor." }, { status: 500 });
   }
 }

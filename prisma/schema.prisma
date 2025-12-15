@@ -1,25 +1,72 @@
 // 📁 prisma/schema.prisma
 
-// ... (outras configurações) ...
-
-// 🛑 Novo ENUM para as roles
-enum Role {
-  CLIENTE
-  ADMIN
+generator client {
+  provider = "prisma-client-js"
 }
 
+// ATENÇÃO: Provedor definido como SQLite para o ambiente local.
+datasource db {
+  provider = "sqlite" 
+  url      = env("DATABASE_URL")
+}
+
+// O bloco "enum Role" FOI REMOVIDO.
+// O tipo Role é agora uma String no modelo User.
+
+// Modelo do Usuário - Atualizado para suportar Credenciais e Cadastro Manual
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  
-  // 🛑 Novo CAMPO role
-  role          Role      @default(CLIENTE) 
 
+  // NOVOS CAMPOS PARA CADASTRO MANUAL
+  password      String?   
+  username      String?   @unique 
+  birthdate     DateTime? 
+  phone         String?   
+
+  // ROLE - AGORA É DO TIPO String com valor padrão
+  role          String    @default("CLIENT")
+
+  // RELAÇÕES OBRIGATÓRIAS DO NEXTAUTH
   accounts      Account[]
   sessions      Session[]
 }
 
-// ... (outras tabelas Account, Session, VerificationToken) ...
+// Modelos obrigatórios para o NextAuth.js (mantenha o restante)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
