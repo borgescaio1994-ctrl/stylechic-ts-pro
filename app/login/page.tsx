@@ -1,28 +1,51 @@
-import CustomLoginForm from "@/components/auth/CustomLoginForm";
-import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"; // Importar o novo botão
+// 📁 app/login/page.tsx (Código Corrigido)
 
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { getProviders } from "next-auth/react";
+// CORREÇÃO: Importa authOptions do caminho correto '@/lib/auth'
+import { authOptions } from "@/lib/auth"; 
+import { SignInForm } from "@/components/auth/SignInForm"; 
+
+/**
+ * Esta página é responsável por exibir o formulário de login/registro.
+ * É um Server Component (async function).
+ */
 export default async function LoginPage() {
-  // getProviders() e googleProvider removidos
-  
-  return (
-    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-gray-50 p-6">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl">
-        <h2 className="text-3xl font-bold mb-6 text-center text-indigo-700">Acessar Sua Conta</h2>
+    // 1. Verifica a sessão (Server-side)
+    const session = await getServerSession(authOptions);
 
-        {/* Opção 1: Login com Google (Usando o Componente Cliente) */}
-        <GoogleSignInButton />
-        
-        {/* Separador "OU" */}
-        <div className="flex items-center my-6">
-          <hr className="flex-grow border-gray-300" />
-          <span className="mx-4 text-gray-500 text-sm">OU</span>
-          <hr className="flex-grow border-gray-300" />
+    if (session) {
+        // Redireciona para o painel principal se já estiver autenticado
+        redirect("/dashboard");
+    }
+
+    // 2. Obtém os provedores configurados
+    const providers = await getProviders();
+
+    return (
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 pt-20">
+            <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-2xl border border-gray-100">
+                <header className="text-center">
+                    <h1 className="text-4xl font-extrabold text-brand-accent">
+                        Acesso StyleChic Pro
+                    </h1>
+                    <p className="mt-3 text-base text-gray-500">
+                        Faça login para gerenciar agendamentos e serviços.
+                    </p>
+                </header>
+
+                {/* 3. Passa os provedores para o componente cliente */}
+                <SignInForm providers={providers} />
+                
+                {/* Rodapé com link opcional para cadastro */}
+                 <footer className="text-center pt-4 text-sm text-gray-500">
+                    Novo por aqui? 
+                    <a href="/register" className="font-medium text-brand-accent hover:text-brand-accent/90 ml-1">
+                        Crie sua conta
+                    </a>
+                </footer>
+            </div>
         </div>
-
-        {/* Opção 2: Formulário de Cadastro/Login Manual */}
-        <CustomLoginForm />
-
-      </div>
-    </div>
-  );
+    );
 }

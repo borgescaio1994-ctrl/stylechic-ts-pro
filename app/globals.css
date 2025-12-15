@@ -1,23 +1,8 @@
-/*
- * Diretivas do Tailwind CSS
- * Estas linhas são cruciais para que o Tailwind compile e injete seus estilos.
- */
+/* 📁 app/globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* * Adicione estilos globais customizados abaixo, se necessário.
- * Por exemplo, você pode querer definir o 'box-sizing' para todos os elementos
- * para facilitar o layout (uma boa prática em CSS moderno).
- */
-
-/* Exemplo de Reset Básico (opcional, mas recomendado) */
-body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* * Se você tiver classes CSS específicas que não são do Tailwind, 
- * adicione-as aqui.
- */
+/* Opcional: Se você pretende reintroduzir a biblioteca de animação posteriormente */
+/* @import 'tw-animate-css'; */
