@@ -4,16 +4,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// ATENÇÃO: Provedor definido como SQLite para o ambiente local.
+// Provedor definido como SQLite
 datasource db {
   provider = "sqlite" 
   url      = env("DATABASE_URL")
 }
 
-// O bloco "enum Role" FOI REMOVIDO.
-// O tipo Role é agora uma String no modelo User.
-
-// Modelo do Usuário - Atualizado para suportar Credenciais e Cadastro Manual
+// Modelo do Usuário
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -21,13 +18,13 @@ model User {
   emailVerified DateTime?
   image         String?
 
-  // NOVOS CAMPOS PARA CADASTRO MANUAL
+  // CAMPOS DE LOGIN MANUAL (Ainda no esquema, mas sem uso agora)
   password      String?   
   username      String?   @unique 
   birthdate     DateTime? 
   phone         String?   
 
-  // ROLE - AGORA É DO TIPO String com valor padrão
+  // ROLE - TIPO String com valor padrão
   role          String    @default("CLIENT")
 
   // RELAÇÕES OBRIGATÓRIAS DO NEXTAUTH
@@ -35,7 +32,7 @@ model User {
   sessions      Session[]
 }
 
-// Modelos obrigatórios para o NextAuth.js (mantenha o restante)
+// Modelos obrigatórios do NextAuth (restante)
 model Account {
   id                String  @id @default(cuid())
   userId            String
