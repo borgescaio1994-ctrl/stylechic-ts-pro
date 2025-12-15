@@ -1,73 +1,25 @@
 // 📁 prisma/schema.prisma
 
-// Define a versão do Prisma CLI
-generator client {
-  provider = "prisma-client-js"
+// ... (outras configurações) ...
+
+// 🛑 Novo ENUM para as roles
+enum Role {
+  CLIENTE
+  ADMIN
 }
 
-// Define a fonte de dados (datasource)
-datasource db {
-  provider = "postgresql" // Mantenha "postgresql" ou mude para "sqlite" se for o caso
-  url      = env("DATABASE_URL") // <-- LINHA CRÍTICA QUE ESTAVA FALTANDO/COMENTADA
-}
-
-// ==========================================================
-// MODELOS REQUERIDOS PELO NEXTAUTH/PRISMA ADAPTER
-// ==========================================================
-
-// Modelo de Usuário (User Model)
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  
+  // 🛑 Novo CAMPO role
+  role          Role      @default(CLIENTE) 
 
-  // Relacionamentos com o NextAuth
   accounts      Account[]
   sessions      Session[]
-  
-  // Adicione modelos específicos do seu projeto (ex: Agendamentos, Profissionais) aqui
-  // Exemplo: appointments Appointment[]
 }
 
-// Modelo de Conta (Account Model) - Usado para vincular o usuário a provedores (Google, etc.)
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-// Modelo de Sessão (Session Model)
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-// Modelo de Token de Verificação (Opcional, mas útil para "Esqueceu a senha", etc.)
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
+// ... (outras tabelas Account, Session, VerificationToken) ...

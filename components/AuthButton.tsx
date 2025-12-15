@@ -1,47 +1,64 @@
 // 📁 components/AuthButton.tsx
-"use client"; // <--- ESSENCIAL PARA USAR useSession, signIn, signOut
 
-import { useSession, signIn, signOut } from "next-auth/react";
-import { LogIn, LogOut } from "lucide-react"; 
+"use client";
 
-// Usa classes simples do Tailwind para estilizar
-const Button = ({ children, onClick, className }) => (
-    <button 
-        onClick={onClick} 
-        className={`flex items-center px-4 py-2 rounded font-semibold transition-colors ${className}`}
-    >
-        {children}
-    </button>
-);
+import { signIn, signOut, useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { LogOut, LogIn } from "lucide-react";
 
-export const AuthButton = () => {
-    const { data: session, status } = useSession();
+export function AuthButton() {
+  // Use o hook para obter o status da sessão e os dados do usuário
+  const { data: session, status } = useSession();
 
-    if (status === "loading") {
-        return <Button className="bg-gray-300 text-gray-600">Carregando...</Button>;
-    }
-
-    // Se estiver logado
-    if (session) {
-        return (
-            <div className="flex items-center space-x-2">
-                <Button 
-                    onClick={() => signOut()} 
-                    className="bg-red-500 hover:bg-red-600 text-white"
-                >
-                    <LogOut className="w-4 h-4 mr-2" /> Sair
-                </Button>
-            </div>
-        );
-    }
-
-    // Se não estiver logado
+  // 1. Estado de Carregamento (Inicial)
+  if (status === "loading") {
     return (
-        <Button 
-            onClick={() => signIn("google")} // Chama o login
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-        >
-            <LogIn className="w-4 h-4 mr-2" /> Entrar
-        </Button>
+      <button className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg cursor-not-allowed">
+        Carregando...
+      </button>
     );
-};
+  }
+
+  // 2. Estado Autenticado (Logado)
+  if (status === "authenticated") {
+    const user = session.user;
+
+    return (
+      <div className="flex items-center space-x-3">
+        {/* Exibe o Avatar e Nome do Usuário */}
+        <div className="flex items-center space-x-2">
+          <Avatar>
+            {/* Usa a imagem do Google, se disponível */}
+            <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User Avatar"} />
+            {/* Fallback para o nome (primeira letra) */}
+            <AvatarFallback>{user.name ? user.name[0] : 'U'}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium text-gray-700 hidden sm:inline">
+            {/* Exibe o nome ou email, se o nome não estiver disponível */}
+            Olá, {user.name || user.email}!
+          </span>
+        </div>
+
+        {/* Botão Sair */}
+        <button
+          onClick={() => signOut()}
+          className="flex items-center bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+        >
+          <LogOut size={16} className="mr-2" />
+          Sair
+        </button>
+      </div>
+    );
+  }
+
+  // 3. Estado Não Autenticado (Deslogado)
+  return (
+    <button
+      onClick={() => signIn('google')}
+      className="flex items-center bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+    >
+      <LogIn size={16} className="mr-2" />
+      Entrar
+    </button>
+  );
+}
