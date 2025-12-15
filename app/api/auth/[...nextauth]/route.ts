@@ -1,80 +1,94 @@
-// 📁 app/api/auth/[...nextauth]/route.ts
+// 📁 app/api/auth/[...nextauth]/route.ts (Código COMPLETO e FUNCIONAL)
 
 import NextAuth, { AuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials"; 
+import GoogleProvider from "next-auth/providers/google"; 
+import CredentialsProvider from "next-auth/providers/credentials"; // Reabilitado para login manual
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma"; 
-import { Role } from "@prisma/client"; 
-import bcrypt from 'bcryptjs'; 
+// Linha 8 corrigida para usar 'bcryptjs' que foi instalado:
+import * as bcrypt from 'bcryptjs'; 
 
 export const authOptions: AuthOptions = {
-  adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(prisma),
 
-  providers: [
-    // 1. Provedor Google (para Login Social)
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    }),
+    providers: [
+        // 1. Provedor Google 
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+            authorization: {
+                params: {
+                    prompt: "consent", 
+                    access_type: "offline" 
+                }
+            }
+        }),
+        
+        // 2. Provedor de Credenciais (Login Manual)
+        CredentialsProvider({
+            name: 'Credentials',
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Password", type: "password" }
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) {
+                    return null;
+                }
+
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email }
+                });
+
+                if (!user || !user.password) {
+                    return null;
+                }
+
+                // Comparação da senha criptografada usando bcryptjs
+                const isValid = await bcrypt.compare(credentials.password, user.password);
+
+                if (!isValid) {
+                    return null;
+                }
+
+                // Retorna o objeto user
+                return {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
+                };
+            }
+        })
+    ],
+
+    session: {
+        strategy: "jwt", 
+    },
     
-    // 2. Provedor Credentials (para Login Manual após Cadastro)
-    CredentialsProvider({
-        name: "E-mail e Senha",
-        credentials: {
-          email: { label: "E-mail", type: "email" },
-          password: { label: "Senha", type: "password" },
+    pages: { 
+        signIn: '/login',
+    },
+
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                // Adiciona a role do usuário no token JWT
+                token.role = (user as { role: string }).role; 
+            }
+            return token;
         },
-        async authorize(credentials) {
-          if (!credentials?.email || !credentials.password) {
-            return null;
-          }
-
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          });
-
-          if (!user || !user.password) {
-            return null;
-          }
-
-          const isValid = await bcrypt.compare(credentials.password, user.password);
-
-          if (!isValid) {
-            return null;
-          }
-
-          // Retorna o objeto user, que será usado para criar a sessão
-          return user; 
-        }
-    }),
-  ],
-
-  session: {
-    strategy: "jwt", 
-  },
-  
-  pages: { 
-    signIn: '/login', // Redireciona a chamada do NextAuth para nossa página customizada
-  },
-
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as { role: Role }).role; 
-      }
-      return token;
+        
+        async session({ session, token }) {
+            if (token) {
+                // Adiciona a role do token JWT na sessão do usuário
+                (session.user as { role: string }).role = token.role as string;
+            }
+            return session;
+        },
     },
     
-    async session({ session, token }) {
-      if (token) {
-        (session.user as { role: Role }).role = token.role as Role;
-      }
-      return session;
-    },
-  },
-  
-  secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

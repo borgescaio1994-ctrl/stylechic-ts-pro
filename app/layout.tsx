@@ -1,18 +1,31 @@
-// 📁 app/layout.tsx (ATUALIZADO E CORRIGIDO)
+// app/layout.tsx
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// IMPORTANTE: Mantenha as importações das fontes
+import { Playfair_Display, Inter } from "next/font/google"; 
 import "./globals.css";
 
-// CORREÇÃO AQUI: Importação Padrão (sem chaves)
-import Header from '@/components/layout/Header'; 
-import SessionProvider from "@/components/providers/SessionProvider"; 
+// 1. Importar a Navbar
+import Navbar from '@/components/Navbar'; 
+// 2. Importar o Wrapper de Sessão (CORREÇÃO do erro useSession)
+import { SessionWrapper } from '@/components/auth/SessionWrapper'; 
 
-const inter = Inter({ subsets: ["latin"] });
+// Configuração da fonte Serif para Títulos
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
+
+// Configuração da fonte Sans-serif para Corpo
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
 
 export const metadata: Metadata = {
   title: "StyleChic Pro",
-  description: "Sistema de Agendamento para Salão de Beleza",
+  description: "Sistema de Gestão para Salão de Beleza",
 };
 
 export default function RootLayout({
@@ -21,14 +34,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br">
-      <body className={inter.className}>
-        <SessionProvider>
-          <Header /> {/* Adicionando o Header em todas as páginas */}
-          <main>
-            {children}
-          </main>
-        </SessionProvider>
+    // 3. Aplicar as variáveis CSS das fontes no <html> para o Tailwind ler
+    <html lang="pt-BR" className={`${playfair.variable} ${inter.variable}`}>
+      {/* 4. Aplica a fonte do corpo (body) e um fundo cinza suave (bg-gray-50) */}
+      <body className={`font-body bg-gray-50`}>
+        
+        {/* 5. SessionWrapper envolve toda a aplicação para fornecer o contexto de autenticação */}
+        <SessionWrapper>
+            
+            {/* 6. A Navbar aparece em todas as páginas */}
+            <Navbar /> 
+            
+            <main className="min-h-screen">
+                {children}
+            </main>
+            
+        </SessionWrapper>
       </body>
     </html>
   );
