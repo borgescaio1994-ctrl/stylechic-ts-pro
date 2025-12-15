@@ -1,52 +1,43 @@
-// src/app/login/page.tsx
+// 📁 app/login/page.tsx
 
 import { getProviders } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import CustomLoginForm from "@/components/auth/CustomLoginForm";
 
-/**
- * Esta página é responsável por exibir o formulário de login.
- */
 export default async function LoginPage() {
-    // 1. Verifica se o usuário já está logado
-    const session = await getServerSession(authOptions);
+  // Obtém os provedores de autenticação configurados (Google, Credentials)
+  const providers = await getProviders();
+  const googleProvider = providers?.google;
 
-    if (session) {
-        // Redireciona para o painel principal se já estiver autenticado
-        redirect("/dashboard");
-    }
+  return (
+    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-gray-50 p-6">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl">
+        <h2 className="text-3xl font-bold mb-6 text-center text-indigo-700">Acessar Sua Conta</h2>
 
-    // 2. Obtém os provedores de autenticação configurados (apenas Email, por enquanto)
-    const providers = await getProviders();
-
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-xl">
-                <h1 className="text-center text-3xl font-extrabold text-gray-900">
-                    Acesso StyleChic Pro
-                </h1>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    Faça login ou crie sua conta para gerenciar seus serviços de beleza.
-                </p>
-
-                {/* --- Formulário de Login (Simples) --- */}
-                <div className="space-y-4">
-                    {/* Renderiza um botão para cada provedor */}
-                    {providers &&
-                        Object.values(providers).map((provider) => (
-                            <div key={provider.name}>
-                                {/* NOTA: O formulário de email será mais complexo e será adicionado na próxima etapa. */}
-                                <button
-                                    // Ação de login será implementada no lado do cliente
-                                    className="w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                >
-                                    Continuar com {provider.name}
-                                </button>
-                            </div>
-                        ))}
-                </div>
-            </div>
+        {/* Opção 1: Login com Google (Apenas se o provedor estiver disponível) */}
+        {googleProvider && (
+          <a
+            // A URL de signin é fornecida pelo NextAuth
+            href={googleProvider.signinUrl}
+            className="w-full flex justify-center items-center py-3 px-4 mb-6 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150"
+          >
+            {/* Você deve ter um ícone do Google na pasta /public (e.g., /google.svg) */}
+            <img src="/google.svg" alt="Google" className="w-5 h-5 mr-3" />
+            Continuar com Google
+          </a>
+        )}
+        
+        {/* Separador "OU" */}
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-gray-300" />
+          <span className="mx-4 text-gray-500 text-sm">OU</span>
+          <hr className="flex-grow border-gray-300" />
         </div>
-    );
+
+        {/* Opção 2: Formulário de Cadastro/Login Manual (Client Component) */}
+        {/* Este componente contém a lógica de estado e a mudança entre Login e Cadastro */}
+        <CustomLoginForm />
+
+      </div>
+    </div>
+  );
 }

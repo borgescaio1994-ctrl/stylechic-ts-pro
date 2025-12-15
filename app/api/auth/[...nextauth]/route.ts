@@ -1,12 +1,13 @@
-// 📁 app/api/auth/[...nextauth]/route.ts
+// 📁 app/api/auth/[...nextauth]/route.ts (Completo e Final)
 
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+// 🛑 NOVO: Importe o CredentialsProvider
+import CredentialsProvider from "next-auth/providers/credentials"; 
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-
-// 🛑 Importação corrigida: usando { prisma }
 import { prisma } from "@/lib/prisma"; 
 import { Role } from "@prisma/client"; 
+import bcrypt from 'bcryptjs'; // Importe o bcrypt
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -16,27 +17,60 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
+    
+    // 🛑 NOVO: Adicione o CredentialsProvider para login manual
+    CredentialsProvider({
+        name: "E-mail e Senha",
+        credentials: {
+          email: { label: "E-mail", type: "email" },
+          password: { label: "Senha", type: "password" },
+        },
+        async authorize(credentials) {
+          if (!credentials?.email || !credentials.password) {
+            return null;
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
+
+          if (!user || !user.password) {
+            return null;
+          }
+
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isValid) {
+            return null;
+          }
+
+          // Se for válido, retorna o usuário (o NextAuth usará este objeto)
+          return user; 
+        }
+    }),
   ],
 
-  // Essencial para usar callbacks com o App Router
   session: {
     strategy: "jwt", 
   },
+  
+  pages: { // Redireciona para nossa página customizada
+    signIn: '/login', 
+  },
 
   callbacks: {
-    // 1. Injeta a ROLE do Banco de Dados no JWT Token
+    // ... (Mantenha os callbacks jwt e session intactos)
     async jwt({ token, user }) {
       if (user) {
-        // user é o objeto retornado pelo adaptador do Prisma, que contém a role
+        // ... (Mantém o token.role)
         token.role = (user as { role: Role }).role; 
       }
       return token;
     },
     
-    // 2. Injeta a ROLE do JWT Token na Sessão
     async session({ session, token }) {
       if (token) {
-        // A sessão é lida pelo useSession() no lado do cliente
+        // ... (Mantém o session.user.role)
         (session.user as { role: Role }).role = token.role as Role;
       }
       return session;

@@ -1,20 +1,34 @@
-// 📁 app/layout.tsx
+// 📁 app/layout.tsx (ATUALIZADO E CORRIGIDO)
 
-import './globals.css';
-import { NextAuthProvider } from '../components/NextAuthProvider'; 
-// CORRIGINDO O CAMINHO: '../components/layout/Header'
-import { Header } from '../components/layout/Header'; // <-- CORREÇÃO AQUI
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// CORREÇÃO AQUI: Importação Padrão (sem chaves)
+import Header from '@/components/layout/Header'; 
+import SessionProvider from "@/components/providers/SessionProvider"; 
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "StyleChic Pro",
+  description: "Sistema de Agendamento para Salão de Beleza",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="pt-BR">
-      <body>
-        <NextAuthProvider>
-          {/* O HEADER É RENDERIZADO AQUI, AGORA COM ACESSO À SESSÃO */}
-          <Header /> 
-          
-          {children}
-        </NextAuthProvider>
+    <html lang="pt-br">
+      <body className={inter.className}>
+        <SessionProvider>
+          <Header /> {/* Adicionando o Header em todas as páginas */}
+          <main>
+            {children}
+          </main>
+        </SessionProvider>
       </body>
     </html>
   );
