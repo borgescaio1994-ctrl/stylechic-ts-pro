@@ -1,38 +1,27 @@
-// 📁 prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Provedor definido como SQLite
 datasource db {
-  provider = "sqlite" 
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// Modelo do Usuário
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-
-  // CAMPOS DE LOGIN MANUAL (Ainda no esquema, mas sem uso agora)
-  password      String?   
-  username      String?   @unique 
-  birthdate     DateTime? 
-  phone         String?   
-
-  // ROLE - TIPO String com valor padrão
+  password      String?
+  username      String?   @unique
+  birthdate     DateTime?
+  phone         String?
   role          String    @default("CLIENT")
-
-  // RELAÇÕES OBRIGATÓRIAS DO NEXTAUTH
   accounts      Account[]
   sessions      Session[]
 }
 
-// Modelos obrigatórios do NextAuth (restante)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -46,8 +35,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }

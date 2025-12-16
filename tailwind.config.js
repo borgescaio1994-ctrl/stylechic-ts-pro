@@ -1,8 +1,7 @@
-// 📁 tailwind.config.js 
+// 📁 tailwind.config.js (COM PALETA DARK/GOLD)
  
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // CRÍTICO: Mapeamento de todos os arquivos
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',

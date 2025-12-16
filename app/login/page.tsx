@@ -1,50 +1,48 @@
-// 📁 app/login/page.tsx (Código Corrigido)
+// 📁 app/login/page.tsx (CORRIGIDO para usar o GoogleSignInButton)
 
+import { getProviders } from "next-auth/react"; 
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { getProviders } from "next-auth/react";
-// CORREÇÃO: Importa authOptions do caminho correto '@/lib/auth'
+// A importação do authOptions precisa ser direta, por isso usamos lib/auth
 import { authOptions } from "@/lib/auth"; 
-import { SignInForm } from "@/components/auth/SignInForm"; 
 
-/**
- * Esta página é responsável por exibir o formulário de login/registro.
- * É um Server Component (async function).
- */
+// Importamos o novo componente CLIENTE
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton"; 
+
 export default async function LoginPage() {
-    // 1. Verifica a sessão (Server-side)
     const session = await getServerSession(authOptions);
 
     if (session) {
-        // Redireciona para o painel principal se já estiver autenticado
-        redirect("/dashboard");
+        // Redireciona para a rota correta após o login
+        redirect("/dashboard/barbershops"); 
     }
 
-    // 2. Obtém os provedores configurados
+    // Busca os provedores (Google, etc.) - Isso roda no Servidor
     const providers = await getProviders();
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 pt-20">
-            <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-2xl border border-gray-100">
-                <header className="text-center">
-                    <h1 className="text-4xl font-extrabold text-brand-accent">
-                        Acesso StyleChic Pro
-                    </h1>
-                    <p className="mt-3 text-base text-gray-500">
-                        Faça login para gerenciar agendamentos e serviços.
-                    </p>
-                </header>
+        // Aplicando classes do tema Dark/Gold
+        <div className="flex min-h-screen items-center justify-center bg-brand-dark p-4">
+            <div className="w-full max-w-md space-y-8 rounded-lg bg-brand-surface p-8 shadow-xl text-brand-text">
+                <h1 className="text-center text-3xl font-extrabold text-brand-accent">
+                    Acesso StyleChic Pro
+                </h1>
+                <p className="mt-2 text-center text-sm text-gray-400">
+                    Faça login para gerenciar suas barbearias e agendamentos.
+                </p>
 
-                {/* 3. Passa os provedores para o componente cliente */}
-                <SignInForm providers={providers} />
-                
-                {/* Rodapé com link opcional para cadastro */}
-                 <footer className="text-center pt-4 text-sm text-gray-500">
-                    Novo por aqui? 
-                    <a href="/register" className="font-medium text-brand-accent hover:text-brand-accent/90 ml-1">
-                        Crie sua conta
-                    </a>
-                </footer>
+                {/* --- Botões de Provedores --- */}
+                <div className="space-y-4">
+                    {providers &&
+                        Object.values(providers).map((provider) => (
+                            <div key={provider.name}>
+                                {/* Usamos o componente CLIENTE para encapsular o onClick */}
+                                <GoogleSignInButton providerId={provider.id}>
+                                    Continuar com {provider.name}
+                                </GoogleSignInButton>
+                            </div>
+                        ))}
+                </div>
             </div>
         </div>
     );
