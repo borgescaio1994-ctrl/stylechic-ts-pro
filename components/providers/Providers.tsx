@@ -1,18 +1,11 @@
-// 📁 components/providers/Providers.tsx (CORRIGIDO)
+// 📁 components/providers/Providers.tsx
+"use client"; // CRÍTICO: Deve ser Cliente para usar SessionProvider
 
-"use client"; // CRÍTICO: Deve ser Client Component
+import { SessionProvider } from 'next-auth/react';
+import { ReactNode } from 'react';
 
-import { SessionProvider } from "next-auth/react";
-import React, { ReactNode } from "react";
-
-// Definição das propriedades (Opcional, mas boa prática)
-interface ProvidersProps {
-  children: ReactNode;
-}
-
-// CRÍTICO: Usamos export default function Providers
-// para corresponder ao "import Providers from..." no layout.
-export default function Providers({ children }: ProvidersProps) {
+// Export default para corresponder ao import Providers from no layout
+export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       {children}

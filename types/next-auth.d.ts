@@ -1,26 +1,33 @@
-// 📁 types/next-auth.d.ts
+// 📁 types/next-auth.d.ts (CORRIGIDO PARA TIPAR NOME E isAdmin)
 
-import NextAuth, { DefaultSession } from "next-auth";
-import { DefaultJWT } from "next-auth/jwt";
+import NextAuth, { DefaultSession, DefaultUser, JWT as DefaultJWT } from "next-auth";
 
-// 1. Augmentação da Sessão (O que getServerSession lê)
 declare module "next-auth" {
   /**
-   * Extende a sessão para incluir a ID do usuário (vindo do Prisma/Adapter).
+   * Extends module NextAuth to add custom properties to the session.
    */
   interface Session {
     user: {
-      id: string; // <-- CRÍTICO: Define que o user sempre terá um ID.
+      id: string; 
+      isAdmin: boolean; // ADICIONADO: Status Admin
     } & DefaultSession["user"];
+  }
+
+  /**
+   * Extends the built-in User type to include custom fields from your database.
+   */
+  interface User extends DefaultUser {
+    id: string; 
+    isAdmin: boolean; // ADICIONADO: Status Admin
   }
 }
 
-// 2. Augmentação do JWT (O token que trafega a informação)
 declare module "next-auth/jwt" {
   /**
-   * Extende o JWT para incluir a ID do usuário.
+   * Extends module next-auth/jwt to add custom properties to the JWT token.
    */
   interface JWT extends DefaultJWT {
-    id: string; // <-- CRÍTICO: Define que o token terá um ID.
+    id: string;
+    isAdmin: boolean; // ADICIONADO: Status Admin
   }
 }
