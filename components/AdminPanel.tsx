@@ -14,17 +14,16 @@ export function AdminPanel() {
     return null;
   }
 
-  // 2. Verifica a Role
-  // Utilizamos a tipagem estendida que definimos para acessar session.user.role
-  const userRole = session.user.role;
+  // 2. Verifica se é admin
+  const isAdmin = session.user.role === 'ADMIN';
 
-  // Se o usuário não for ADMIN, não renderiza o painel
-  if (userRole !== "ADMIN") {
+  // Se o usuário não for admin, não renderiza o painel
+  if (!isAdmin) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg border border-red-200 mt-6">
         <Lock className="w-6 h-6 text-red-500 mx-auto mb-2" />
         <p className="text-sm text-red-600">
-          Acesso Negado. Você está logado como **{userRole}**.
+          Acesso Negado. Você não tem permissões de administrador.
         </p>
       </div>
     );

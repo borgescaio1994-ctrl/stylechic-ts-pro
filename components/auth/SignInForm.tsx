@@ -7,14 +7,14 @@ import { BuiltInProviderType } from 'next-auth/providers/index';
 import { ClientSafeProvider, signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 // Assegurando que a importação dos ícones do lucide-react esteja correta
-import { LogIn, Mail, Google } from 'lucide-react'; 
+import { LogIn, Mail } from 'lucide-react';
 
-import { Button } from '@/components/ui/button'; 
+import { Button } from '@/components/ui/button';
 
 // Mapeamento de provedores para ícones e cores
 const providerMap = {
-    google: { 
-        icon: Google, 
+    google: {
+        icon: LogIn,
         text: 'Continuar com Google'
     },
     email: { 
@@ -73,7 +73,8 @@ export function SignInForm({ providers }: SignInFormProps) {
             <div className="space-y-4">
                 {/* Botões para Provedores OAuth (Google, etc.) */}
                 {oauthProviders.map((provider) => {
-                    const { icon: Icon, text } = providerMap[provider.id.toLowerCase()] || 
+                    const providerConfig = providerMap[provider.id.toLowerCase() as keyof typeof providerMap];
+                    const { icon: Icon, text } = providerConfig ||
                     { icon: LogIn, text: `Entrar com ${provider.name}` };
                     
                     return (

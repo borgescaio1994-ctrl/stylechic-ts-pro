@@ -4,15 +4,19 @@ import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 
 // As rotas que você quer proteger
-const protectedPaths = ['/dashboard', '/admin']; 
+const protectedPaths = ['/dashboard', '/admin', '/agendamento'];
 
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    
-    // 1. Redirecionar usuários autenticados da página /login para /dashboard
+
+    // 1. Redirecionar usuários autenticados da página /login para /dashboard ou /admin
     if (pathname === '/login' && token) {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
+        if (token.role === 'ADMIN') {
+            return NextResponse.redirect(new URL('/admin', req.url));
+        } else {
+            return NextResponse.redirect(new URL('/dashboard', req.url));
+        }
     }
 
     // 2. Proteger rotas que exigem autenticação
@@ -25,7 +29,20 @@ export async function middleware(req: NextRequest) {
         loginUrl.searchParams.set('callbackUrl', pathname);
         return NextResponse.redirect(loginUrl);
     }
-    
+
+    // 3. Verificar roles para páginas especiais
+    if (pathname.startsWith('/dashboard')) {
+        if (!token || (token.role !== 'ADMIN' && token.role !== 'BARBER')) {
+            return NextResponse.redirect(new URL('/', req.url));
+        }
+    }
+
+    if (pathname.startsWith('/admin')) {
+        if (!token || token.role !== 'ADMIN') {
+            return NextResponse.redirect(new URL('/', req.url));
+        }
+    }
+
     return NextResponse.next();
 }
 
@@ -34,6 +51,7 @@ export const config = {
     matcher: [
         '/login', 
         '/dashboard/:path*', // Protege /dashboard e todas as sub-rotas
-        '/admin/:path*'      // Protege /admin e todas as sub-rotas
+        '/admin/:path*',      // Protege /admin e todas as sub-rotas
+        '/agendamento/:path*' // Protege /agendamento e todas as sub-rotas
     ],
 };

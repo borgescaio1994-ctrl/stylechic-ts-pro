@@ -1,4 +1,4 @@
-// 📁 lib/auth.ts (FINAL COM CHECK ADMIN POR EMAIL E CALLBACKS)
+// 📁 lib/auth.ts (COMPLETO E CORRIGIDO - ADICIONADO PAGES)
 
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
@@ -6,10 +6,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma"; 
 import { JWT } from "next-auth/jwt";
 
-// =======================================================
 // CRÍTICO: LISTA DE EMAILS DE ADMINISTRADORES
-// EMAIL DO USUÁRIO ADICIONADO: stylechic1994@gmail.com
-// =======================================================
 const ADMIN_EMAILS = ["stylechic1994@gmail.com"]; 
 
 export const authOptions: NextAuthOptions = {
@@ -20,38 +17,52 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         }),
     ],
-    // Estratégia JWT é necessária para usar callbacks
     session: {
         strategy: "jwt",
     },
     
+    // =======================================================
+    // CORREÇÃO 1: FORÇAR CALLBACK PARA A PÁGINA DE LOGIN
+    // =======================================================
+    pages: {
+        signIn: '/login',
+        // Redireciona o usuário para /login após o sign in bem-sucedido.
+        // O código de redirecionamento para /admin/dashboard estará lá.
+        error: '/login', // Tratar erros na mesma página
+    },
+    // =======================================================
+    
     callbacks: {
-        // 1. Adiciona o ID, Nome e Status Admin ao token JWT (lido no primeiro login)
         async jwt({ token, user }) {
             if (user) {
-                token.id = user.id; 
-                token.name = user.name; 
-                
-                // Força o status Admin se o email estiver na lista
+                token.id = user.id;
+                token.name = user.name;
+
+                // Buscar role do banco
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: user.id },
+                    select: { role: true }
+                });
+                token.role = dbUser?.role || 'CLIENT';
+
                 if (user.email && ADMIN_EMAILS.includes(user.email)) {
                     token.isAdmin = true;
+                    token.role = 'ADMIN'; // Garantir que admin tenha role ADMIN
                 } else {
-                    // Caso contrário, usa o valor do DB (se existir)
                     // @ts-ignore
                     token.isAdmin = (user as any).isAdmin ?? false;
                 }
             }
-            return token as JWT; 
+            return token as JWT;
         },
-        
-        // 2. Adiciona o ID, Nome e Status Admin do token JWT de volta à sessão (lido pelo getServerSession)
+
         async session({ session, token }) {
             if (token.id) {
-                session.user.id = token.id as string; 
-                session.user.name = token.name as string; 
-                session.user.isAdmin = token.isAdmin as boolean; 
+                session.user.id = token.id as string;
+                session.user.name = token.name as string;
+                session.user.role = token.role as string;
+                session.user.isAdmin = token.isAdmin as boolean;
 
-                // Reforça o check no caso de atualização da lista de emails
                 if (session.user.email && ADMIN_EMAILS.includes(session.user.email)) {
                     session.user.isAdmin = true;
                 }

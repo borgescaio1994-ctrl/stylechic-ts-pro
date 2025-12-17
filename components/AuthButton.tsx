@@ -1,11 +1,17 @@
 // 📁 components/AuthButton.tsx (Alterado)
-"use client"; 
+"use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LogIn, LogOut } from "lucide-react"; 
+import { LogIn, LogOut } from "lucide-react";
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+}
 
 // Usa classes simples do Tailwind para estilizar
-const Button = ({ children, onClick, className }) => (
+const Button = ({ children, onClick, className }: ButtonProps) => (
     <button 
         onClick={onClick} 
         className={`flex items-center px-4 py-2 rounded font-semibold transition-colors ${className}`}

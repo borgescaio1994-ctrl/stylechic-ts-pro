@@ -1,4 +1,4 @@
-// 📁 app/login/page.tsx (SIMPLIFICADO PARA EVITAR CONFLITO DE REDIRECT)
+// 📁 app/login/page.tsx (COMPLETO E CORRIGIDO - LÓGICA DE REDIRECIONAMENTO)
 
 import { getProviders } from "next-auth/react"; 
 import { redirect } from "next/navigation";
@@ -11,15 +11,18 @@ export default async function LoginPage() {
     const session = await getServerSession(authOptions);
 
     if (session) {
-        // Se já estiver logado, mande para a Home, onde o app/page.tsx cuidará do redirecionamento Admin/Usuário
-        redirect("/"); 
+        // CORREÇÃO 2: Lógica de Redirecionamento por Admin
+        if (session.user.isAdmin) {
+            redirect("/admin"); // Redireciona para a rota de admin
+        }
+        // Redirecionamento padrão para o usuário comum
+        redirect("/dashboard/barbershops");
     }
 
     const providers = await getProviders();
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-brand-dark p-4">
-            {/* ... Conteúdo JSX da tela de login ... */}
             <div className="w-full max-w-md space-y-8 rounded-lg bg-brand-surface p-8 shadow-xl text-brand-text">
                 <h1 className="text-center text-3xl font-extrabold text-brand-accent">
                     Acesso StyleChic Pro

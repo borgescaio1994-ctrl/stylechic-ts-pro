@@ -1,7 +1,8 @@
-// 📁 app/api/auth/[...nextauth]/route.ts (CORREÇÃO FINAL DO 405)
+// 📁 app/api/auth/[...nextauth]/route.ts
 
-// Importa os handlers GET e POST que são exportados de lib/auth.ts
+// Importa diretamente as funções de handler (GET e POST) 
+// exportadas no arquivo de configuração do NextAuth (@/lib/auth)
 import { GET, POST } from "@/lib/auth"; 
 
-// Exporta as funções para que o Next.js as reconheça como endpoints
+// Re-exporta as funções para que o Next.js App Router as use
 export { GET, POST };

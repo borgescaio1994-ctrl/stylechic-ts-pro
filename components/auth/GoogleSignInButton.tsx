@@ -3,12 +3,17 @@
 
 import { signIn } from 'next-auth/react';
 import { LogIn } from 'lucide-react';
-import { Button } from '@/components/ui/button'; 
+import { Button } from '@/components/ui/button';
+
+interface GoogleSignInButtonProps {
+  providerId: string;
+  children: React.ReactNode;
+}
 
 /**
  * Componente de cliente que encapsula a lógica de signIn.
  */
-export function GoogleSignInButton({ providerId, children }) {
+export function GoogleSignInButton({ providerId, children }: GoogleSignInButtonProps) {
     
     // O evento onClick só pode existir dentro de um Client Component
     const handleSignIn = () => {

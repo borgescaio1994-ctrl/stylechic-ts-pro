@@ -25,13 +25,18 @@ export default async function DashboardPage() {
             {/* Cabeçalho do Dashboard */}
             <header className="flex justify-between items-center mb-10 border-b border-gray-700 pb-4">
                 <h1 className="text-4xl font-bold text-brand-accent">Painel Principal</h1>
-                
-                {/* Botão de Logout */}
-                <SignOutButton /> 
+
+                {/* Nome do usuário e Botão de Logout */}
+                <div className="flex items-center space-x-4">
+                    <span className="text-sm text-brand-text hidden sm:block">
+                        Olá, <span className="font-semibold">{session?.user?.name || session?.user?.email}</span>
+                    </span>
+                    <SignOutButton />
+                </div>
             </header>
 
             <p className="text-lg text-gray-400 mb-6">
-                Bem-vindo(a), {session?.user?.name || "Style Chic"}. 
+                Bem-vindo(a) ao seu painel.
                 <span className="block text-sm opacity-70 mt-1">Seu ID de usuário (Prisma): {userId}</span>
             </p>
 

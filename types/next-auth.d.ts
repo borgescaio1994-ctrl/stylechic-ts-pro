@@ -1,4 +1,4 @@
-// 📁 types/next-auth.d.ts (CORRIGIDO PARA TIPAR NOME E isAdmin)
+// 📁 types/next-auth.d.ts (ATUALIZADO PARA INCLUIR ROLE)
 
 import NextAuth, { DefaultSession, DefaultUser, JWT as DefaultJWT } from "next-auth";
 
@@ -8,8 +8,9 @@ declare module "next-auth" {
    */
   interface Session {
     user: {
-      id: string; 
-      isAdmin: boolean; // ADICIONADO: Status Admin
+      id: string;
+      role: string; // ADICIONADO: Role do usuário
+      isAdmin: boolean; // Status Admin
     } & DefaultSession["user"];
   }
 
@@ -17,8 +18,9 @@ declare module "next-auth" {
    * Extends the built-in User type to include custom fields from your database.
    */
   interface User extends DefaultUser {
-    id: string; 
-    isAdmin: boolean; // ADICIONADO: Status Admin
+    id: string;
+    role: string; // ADICIONADO: Role do usuário
+    isAdmin: boolean; // Status Admin
   }
 }
 
@@ -28,6 +30,7 @@ declare module "next-auth/jwt" {
    */
   interface JWT extends DefaultJWT {
     id: string;
-    isAdmin: boolean; // ADICIONADO: Status Admin
+    role: string; // ADICIONADO: Role do usuário
+    isAdmin: boolean; // Status Admin
   }
 }

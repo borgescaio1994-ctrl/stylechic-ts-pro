@@ -1,14 +1,20 @@
 // 📁 components/providers/Providers.tsx
-"use client"; // CRÍTICO: Deve ser Cliente para usar SessionProvider
 
-import { SessionProvider } from 'next-auth/react';
-import { ReactNode } from 'react';
+"use client";
 
-// Export default para corresponder ao import Providers from no layout
-export default function Providers({ children }: { children: ReactNode }) {
+import { AuthProvider } from "./auth-provider"; // Importa o componente nomeado
+
+// Componente que agrupa todos os providers
+// Note que este é um *default export*, que é o que layout.tsx espera
+export default function Providers({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <SessionProvider>
+    <AuthProvider>
+      {/* Adicione outros providers aqui, como Toaster/Theme Provider, se necessário */}
       {children}
-    </SessionProvider>
+    </AuthProvider>
   );
 }
